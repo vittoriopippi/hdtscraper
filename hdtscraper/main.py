@@ -49,7 +49,10 @@ class hdtscraper:
 			hd_ids = [m['hd_id'] for m in movies]
 			if str(hd_id) in hd_ids:
 				break
-		return movies[:hd_ids.index(str(hd_id))]	
+		if str(hd_id) in hd_ids:
+			return movies[:hd_ids.index(str(hd_id))]
+		else:
+			return movies	
 
 	def get_page(self, page_index):
 		session = self.login()

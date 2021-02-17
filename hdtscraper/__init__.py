@@ -1,1 +1,1 @@
-from hd_scraper.main import HDTScraper
+from hdtscraper.main import hdtscraper

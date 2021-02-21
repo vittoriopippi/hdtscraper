@@ -9,7 +9,7 @@ setup(
   author = 'Vittorio Pippi',                   # Type in your name
   author_email = 'vittoriopippi97@gmail.com',      # Type in your E-Mail
   url = 'https://github.com/vittoriopippi/hdtscraper',   # Provide either the link to your github or to your website
-  download_url = 'https://github.com/vittoriopippi/hdtscraper/archive/v1.0.tar.gz',    # I explain this later on
+  download_url = 'https://github.com/vittoriopippi/hdtscraper/archive/0.2.tar.gz',    # I explain this later on
   keywords = ['scrape', 'website', 'hdtorrents'],   # Keywords that define your package best
   install_requires=[            # I get to this in a second
           'requests',

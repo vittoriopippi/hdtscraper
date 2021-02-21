@@ -2,6 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 import re
 import time
+import os
 
 class hdtscraper:
 	page_url = 'https://hdtorrents.xyz/index.php?page={}'
@@ -70,14 +71,21 @@ class hdtscraper:
 				movie['size'] = float(re.findall(r'(?P<size>\d+\.\d+) GB', str(movie_content))[0])
 
 				right_content = movie_content.find_all('div',{'align':'right'})[0]
-				movie['torrent_url'] = right_content.find_all('a')[0]['href']
+				movie['torrent_url'] = self.home_url + '/' + right_content.find_all('a')[0]['href']
 				movie['torrent_name'] = movie['torrent_url'].split('=')[-1]
-				movie['torrent_details_url'] = right_content.find_all('a')[1]['href']
+				movie['torrent_details_url'] = self.home_url + '/' + right_content.find_all('a')[1]['href']
 				movie['hd_id'] = movie['torrent_details_url'].split('=')[-1]
 				movies.append(movie)
 			except:
 				pass
 		return movies
+
+	def download_torrent(self, movie, dst_path):
+		session = self.login()
+		response = session.get(movie['torrent_url'])
+
+		with open(os.path.join(dst_path, movie['torrent_name']), 'wb') as torrent:
+			torrent.write(response.content)
 	
 if __name__ == '__main__':
 	import getpass
@@ -85,4 +93,5 @@ if __name__ == '__main__':
 	username = input('Username: ')
 	password = getpass.getpass('Password: ')
 	hd = hdtscraper(username, password)
-	[print(m['torrent_name']) for m in hd.get_last(10)]
+	movie = hd.get_last(1)[0]
+	hd.download_torrent(movie, '.')

@@ -6,19 +6,20 @@ import os
 
 class hdtscraper:
 	page_url = 'https://hdtorrents.xyz/index.php?page={}'
-	__session = None
-	__session_start = None
+	session = None
+	session_start = None
+	login_url = 'https://hdtorrents.xyz/takelogin.php'
+	home_url = 'https://hdtorrents.xyz'
+	session_length = 10 * 60
 
-	def __init__(self, username, password, login_url='https://hdtorrents.xyz/takelogin.php', home_url='https://hdtorrents.xyz'):
+	def __init__(self, username, password):
 		self.username = username
 		self.password = password
-		self.login_url = login_url
-		self.home_url = home_url
 
 	def __login(self):
-		self.__session = requests.Session()
-		self.__session_start = time.time()
-		response = self.__session.get(self.login_url)
+		self.session = requests.Session()
+		self.session_start = time.time()
+		response = self.session.get(self.login_url)
 		assert response.status_code == 200, f'The login url "{self.login_url}" returned status code "{response.status_code}"'
 
 		credentials = dict(username=self.username, password=self.password)
@@ -26,13 +27,23 @@ class hdtscraper:
 		csrf_token = response.raw.headers._container['set-cookie'][1].split('=')[1].split(';')[0]
 		credentials['csrfmiddlewaretoken'] = csrf_token
 
-		response = self.__session.post(self.login_url, data=credentials, headers={'Referer': self.home_url})
+		response = self.session.post(self.login_url, data=credentials, headers={'Referer': self.home_url})
 		assert response.status_code == 200, f'The login url "{self.login_url}" returned status code "{response.status_code}"'
+	
+	@staticmethod
+	def is_up(home_url='https://hdtorrents.xyz'):
+		try:
+			session = requests.session()
+			response = session.get(home_url)
+			assert response.status_code == 200
+		except:
+			return False
+		return True
 
 	def login(self):
-		if self.__session_start is None or time.time() > (self.__session_start + (10 * 60)):
+		if self.session_start is None or time.time() > (self.session_start + self.session_length):
 			self.__login()
-		return self.__session
+		return self.session
 
 	def get_last(self, movie_count, max_pages=50):
 		movies = []
@@ -90,8 +101,11 @@ class hdtscraper:
 if __name__ == '__main__':
 	import getpass
 
-	username = input('Username: ')
-	password = getpass.getpass('Password: ')
-	hd = hdtscraper(username, password)
-	movie = hd.get_last(1)[0]
-	hd.download_torrent(movie, '.')
+	if hdtscraper.is_up():
+		username = input('Username: ')
+		password = getpass.getpass('Password: ')
+		hd = hdtscraper(username, password)
+		movie = hd.get_last(1)[0]
+		hd.download_torrent(movie, '.')
+	else:
+		print('The website is down')
